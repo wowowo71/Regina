@@ -224,6 +224,29 @@
         color: #b42318;
       }
 
+      .submit-progress {
+        display: none;
+        width: 140px;
+        height: 6px;
+        border-radius: 999px;
+        background: rgba(15, 118, 110, 0.18);
+        overflow: hidden;
+      }
+
+      .submit-progress::after {
+        content: "";
+        display: block;
+        width: 45%;
+        height: 100%;
+        border-radius: 999px;
+        background: var(--accent);
+        animation: progress-slide 1s ease-in-out infinite;
+      }
+
+      .submit-progress.is-visible {
+        display: block;
+      }
+
       .footer {
         display: flex;
         flex-wrap: wrap;
@@ -300,11 +323,27 @@
           justify-content: flex-end;
         }
 
-        .footer {
-          flex-direction: column;
-          align-items: flex-start;
-        }
+      .footer {
+        flex-direction: column;
+        align-items: flex-start;
       }
+
+      .submit-progress {
+        width: 100%;
+      }
+    }
+
+    @keyframes progress-slide {
+      0% {
+        transform: translateX(-120%);
+      }
+      50% {
+        transform: translateX(10%);
+      }
+      100% {
+        transform: translateX(220%);
+      }
+    }
     </style>
   </head>
   <body>
@@ -514,6 +553,7 @@
           <div style="display: flex; gap: 10px;">
             <button class="btn btn-ghost" type="reset">Clear</button>
             <button class="btn btn-primary" type="submit">Submit assignments</button>
+            <div class="submit-progress" id="submit-progress" aria-hidden="true"></div>
           </div>
         </div>
         <div class="hint" id="form-status" style="margin-top: 10px;"></div>
@@ -533,6 +573,7 @@ const DATA_FLOW_URL = "https://46074bd623b7eb659325e9bd113c65.0f.environment.api
       const refreshDataButton = document.getElementById("refresh-data");
       const lastSync = document.getElementById("last-sync");
       const submitButton = assignmentForm.querySelector('button[type="submit"]');
+      const submitProgress = document.getElementById("submit-progress");
       const assignmentTemplate = assignmentList.querySelector(".assignment-row").cloneNode(true);
       const dataStore = { sites: [], roles: [], roleGroups: [], people: [], assignments: [] };
       let lookupTimer = null;
@@ -1017,6 +1058,9 @@ const DATA_FLOW_URL = "https://46074bd623b7eb659325e9bd113c65.0f.environment.api
           if (submitButton) {
             submitButton.disabled = true;
           }
+          if (submitProgress) {
+            submitProgress.classList.add("is-visible");
+          }
           formStatus.innerHTML = '<span class="loading-inline"><span class="spinner"></span>Submitting…</span>';
           const response = await fetch(FLOW_URL, {
             method: "POST",
@@ -1038,6 +1082,9 @@ const DATA_FLOW_URL = "https://46074bd623b7eb659325e9bd113c65.0f.environment.api
           assignmentForm.classList.remove("is-busy");
           if (submitButton) {
             submitButton.disabled = false;
+          }
+          if (submitProgress) {
+            submitProgress.classList.remove("is-visible");
           }
         }
       });
