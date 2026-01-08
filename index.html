@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SharePoint Assignment Intake V2</title>
+    <title>SharePoint Assignment Intake</title>
     <style>
       :root {
         --bg: #f5f1e8;
@@ -224,6 +224,15 @@
         color: #b42318;
       }
 
+      .btn-icon {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+
+      .is-hidden {
+        display: none;
+      }
+
       .lookup-banner {
         display: none;
         align-items: center;
@@ -259,16 +268,34 @@
 
       .submit-progress {
         display: none;
-        width: 140px;
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid rgba(15, 118, 110, 0.25);
+        background: rgba(15, 118, 110, 0.08);
+        padding: 10px 12px;
+      }
+
+      .submit-progress.is-visible {
+        display: block;
+      }
+
+      .submit-progress.is-success {
+        border-color: rgba(22, 163, 74, 0.4);
+        background: rgba(22, 163, 74, 0.12);
+        color: #166534;
+      }
+
+      .submit-progress .progress-track {
+        position: relative;
+        width: 100%;
         height: 6px;
         border-radius: 999px;
         background: rgba(15, 118, 110, 0.18);
         overflow: hidden;
+        margin-top: 8px;
       }
 
-      .submit-progress::after {
-        content: "";
-        display: block;
+      .submit-progress .progress-bar {
         width: 45%;
         height: 100%;
         border-radius: 999px;
@@ -276,8 +303,18 @@
         animation: progress-slide 1s ease-in-out infinite;
       }
 
-      .submit-progress.is-visible {
-        display: block;
+      .submit-progress.is-success .progress-track,
+      .submit-progress.is-success .progress-bar {
+        display: none;
+      }
+
+      .submit-progress .progress-text {
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .submit-progress .progress-action {
+        margin-top: 6px;
       }
 
       .footer {
@@ -580,14 +617,14 @@
         </div>
         <div class="section-block">
           <button class="btn btn-wide" type="button" id="add-row">+ Add another role</button>
+          <div class="submit-progress" id="submit-progress" aria-hidden="true"></div>
         </div>
 
         <div class="footer">
           <div class="hint">Tip: Add as many roles as needed before submitting.</div>
           <div style="display: flex; gap: 10px;">
-            <button class="btn btn-ghost" type="reset">Clear</button>
+            <button class="btn btn-ghost" type="reset">Reset form</button>
             <button class="btn btn-primary" type="submit">Submit assignments</button>
-            <div class="submit-progress" id="submit-progress" aria-hidden="true"></div>
           </div>
         </div>
         <div class="hint" id="form-status" style="margin-top: 10px;"></div>
@@ -611,6 +648,7 @@
       const dataStore = { sites: [], roles: [], roleGroups: [], people: [], assignments: [] };
       let lookupTimer = null;
       let lastLookupEmail = "";
+      let resetButton = null;
 
       function toArray(value) {
         return Array.isArray(value) ? value : [];
@@ -786,6 +824,21 @@
         populateRoles(row.querySelector(".role-input"));
         bindRemove(row.querySelector(".btn-danger"));
         bindRoleFiltering(row);
+        bindDirtyTracking(row);
+      }
+
+      function bindDirtyTracking(row) {
+        const siteSelect = row.querySelector(".site-select");
+        const groupSelect = row.querySelector(".role-select");
+        const roleSelect = row.querySelector(".role-input");
+        [siteSelect, groupSelect, roleSelect].forEach((el) => {
+          if (!el) {
+            return;
+          }
+          el.addEventListener("change", () => {
+            row.dataset.dirty = "true";
+          });
+        });
       }
 
       function bindRemove(button) {
@@ -918,6 +971,7 @@
         assignments.forEach((assignment) => {
           const row = assignmentTemplate.cloneNode(true);
           hydrateRow(row);
+          row.dataset.existing = "true";
           const siteSelect = row.querySelector(".site-select");
           const groupSelect = row.querySelector(".role-select");
           const roleSelect = row.querySelector(".role-input");
@@ -936,6 +990,50 @@
           assignmentList.appendChild(row);
         });
         refreshRoleAvailability();
+      }
+
+      function resetFormToBlank() {
+        assignmentForm.reset();
+        assignmentList.innerHTML = "";
+        const blankRow = assignmentTemplate.cloneNode(true);
+        hydrateRow(blankRow);
+        assignmentList.appendChild(blankRow);
+        refreshRoleAvailability();
+        formStatus.textContent = "";
+        if (lookupStatus) {
+          lookupStatus.textContent = "";
+          lookupStatus.className = "lookup-banner";
+        }
+      }
+
+      function setSubmitProgressLoading() {
+        if (!submitProgress) {
+          return;
+        }
+        submitProgress.classList.remove("is-success");
+        submitProgress.classList.add("is-visible");
+        submitProgress.innerHTML =
+          '<div class="progress-text">Submitting assignments…</div><div class="progress-track"><div class="progress-bar"></div></div>';
+      }
+
+      function setSubmitProgressSuccess() {
+        if (!submitProgress) {
+          return;
+        }
+        submitProgress.classList.add("is-success", "is-visible");
+        submitProgress.innerHTML =
+          '<div class="progress-text">Submitted successfully.</div><div class="progress-action"><button class="btn btn-ghost btn-icon" type="button" id="reset-after-submit">Click here to add another user</button></div>';
+        resetButton = document.getElementById("reset-after-submit");
+        if (resetButton) {
+          resetButton.addEventListener("click", () => {
+            resetFormToBlank();
+            submitProgress.classList.remove("is-success", "is-visible");
+            submitProgress.innerHTML = "";
+            if (addRowButton) {
+              addRowButton.classList.remove("is-hidden");
+            }
+          });
+        }
       }
 
       async function fetchData(payload) {
@@ -1069,7 +1167,9 @@
           const site = row.querySelector(".site-select")?.value;
           const securityGroup = row.querySelector(".role-select")?.value;
           const role = row.querySelector(".role-input")?.value;
-          if (site && securityGroup && role) {
+          const isExisting = row.dataset.existing === "true";
+          const isDirty = row.dataset.dirty === "true";
+          if (site && securityGroup && role && (!isExisting || isDirty)) {
             payload.assignments.push({
               site,
               securityGroup,
@@ -1100,9 +1200,10 @@
           if (submitButton) {
             submitButton.disabled = true;
           }
-          if (submitProgress) {
-            submitProgress.classList.add("is-visible");
+          if (addRowButton) {
+            addRowButton.classList.add("is-hidden");
           }
+          setSubmitProgressLoading();
           formStatus.innerHTML = '<span class="loading-inline"><span class="spinner"></span>Submitting…</span>';
           const response = await fetch(FLOW_URL, {
             method: "POST",
@@ -1115,9 +1216,7 @@
           }
 
           formStatus.textContent = "Submitted successfully.";
-          assignmentForm.reset();
-          refreshRoleAvailability();
-          assignmentList.querySelectorAll(".assignment-row").forEach(filterRoles);
+          setSubmitProgressSuccess();
         } catch (error) {
           formStatus.textContent = "Submission failed. Check the flow and try again.";
         } finally {
@@ -1125,11 +1224,16 @@
           if (submitButton) {
             submitButton.disabled = false;
           }
-          if (submitProgress) {
+          if (addRowButton && !submitProgress?.classList.contains("is-success")) {
+            addRowButton.classList.remove("is-hidden");
+          }
+          if (submitProgress && !submitProgress.classList.contains("is-success")) {
             submitProgress.classList.remove("is-visible");
+            submitProgress.innerHTML = "";
           }
         }
       });
     </script>
   </body>
 </html>
+
