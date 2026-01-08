@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SharePoint Assignment Intake</title>
+    <title>SharePoint Assignment Intake V2</title>
     <style>
       :root {
         --bg: #f5f1e8;
@@ -224,6 +224,39 @@
         color: #b42318;
       }
 
+      .lookup-banner {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        border: 1px solid transparent;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .lookup-banner.is-existing {
+        display: flex;
+        background: rgba(15, 118, 110, 0.12);
+        color: #0b5f58;
+        border-color: rgba(15, 118, 110, 0.35);
+      }
+
+      .lookup-banner.is-new {
+        display: flex;
+        background: rgba(197, 107, 0, 0.12);
+        color: #8a4a00;
+        border-color: rgba(197, 107, 0, 0.35);
+      }
+
+      .lookup-banner.is-error {
+        display: flex;
+        background: rgba(180, 35, 24, 0.1);
+        color: #8f1d13;
+        border-color: rgba(180, 35, 24, 0.35);
+      }
+
       .submit-progress {
         display: none;
         width: 140px;
@@ -281,12 +314,6 @@
         animation: spin 0.8s linear infinite;
       }
 
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
       .stats-grid {
         display: grid;
         gap: 12px;
@@ -323,27 +350,33 @@
           justify-content: flex-end;
         }
 
-      .footer {
-        flex-direction: column;
-        align-items: flex-start;
+        .footer {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .submit-progress {
+          width: 100%;
+        }
       }
 
-      .submit-progress {
-        width: 100%;
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
       }
-    }
 
-    @keyframes progress-slide {
-      0% {
-        transform: translateX(-120%);
+      @keyframes progress-slide {
+        0% {
+          transform: translateX(-120%);
+        }
+        50% {
+          transform: translateX(10%);
+        }
+        100% {
+          transform: translateX(220%);
+        }
       }
-      50% {
-        transform: translateX(10%);
-      }
-      100% {
-        transform: translateX(220%);
-      }
-    }
     </style>
   </head>
   <body>
@@ -358,6 +391,7 @@
       </div>
 
       <form class="card" id="assignment-form" action="#" method="post">
+        <div class="lookup-banner" id="lookup-status"></div>
         <div class="section-title">
           <h2>Person Details (People list)</h2>
           <span class="pill">Auto-updated by flow</span>
@@ -561,12 +595,10 @@
     </div>
 
     <script>
-      const FLOW_URL = "https://46074bd623b7eb659325e9bd113c65.0f.environment.api.powerplatform.com:443/powerautomate/automations/direct/
-  workflows/10fd8c46f92d469c945b9da0c3ff12ec/triggers/When_a_HTTP_request_is_received/paths/invoke?api-
-  version=1&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=C2Re-lr-6ACTJUfE9aZkKtzmHmP3zVEBStON4N_yNpE";
-  const DATA_FLOW_URL = "https://46074bd623b7eb659325e9bd113c65.0f.environment.api.powerplatform.com:443/powerautomate/automations/direct/
-  workflows/f9caec2a4338481fb6f51209aa81b3ba/triggers/When_a_HTTP_request_is_received/paths/invoke?api-
-  version=1&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=3OZ5Ft7dAHNpZE9fJg1fYt1eVH83PNMM0XBIM7dGncA";const assignmentList = document.getElementById("assignment-list");
+      const FLOW_URL = "https://46074bd623b7eb659325e9bd113c65.0f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/10fd8c46f92d469c945b9da0c3ff12ec/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=1&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=C2Re-lr-6ACTJUfE9aZkKtzmHmP3zVEBStON4N_yNpE";
+      const DATA_FLOW_URL = "https://46074bd623b7eb659325e9bd113c65.0f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f9caec2a4338481fb6f51209aa81b3ba/triggers/When_a_HTTP_request_is_received/paths/invoke?api-version=1&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=3OZ5Ft7dAHNpZE9fJg1fYt1eVH83PNMM0XBIM7dGncA";
+
+      const assignmentList = document.getElementById("assignment-list");
       const addRowButton = document.getElementById("add-row");
       const assignmentForm = document.getElementById("assignment-form");
       const formStatus = document.getElementById("form-status");
@@ -574,6 +606,7 @@
       const lastSync = document.getElementById("last-sync");
       const submitButton = assignmentForm.querySelector('button[type="submit"]');
       const submitProgress = document.getElementById("submit-progress");
+      const lookupStatus = document.getElementById("lookup-status");
       const assignmentTemplate = assignmentList.querySelector(".assignment-row").cloneNode(true);
       const dataStore = { sites: [], roles: [], roleGroups: [], people: [], assignments: [] };
       let lookupTimer = null;
@@ -594,15 +627,7 @@
         if (typeof value === "string") {
           return value.trim();
         }
-        const nested = getField(value, [
-          "Value",
-          "Title",
-          "title",
-          "Site_URL",
-          "SiteURL",
-          "siteUrl",
-          "site_url",
-        ]);
+        const nested = getField(value, ["Value", "Title", "title", "Site_URL", "SiteURL", "siteUrl", "site_url"]);
         return typeof nested === "string" ? nested.trim() : "";
       }
 
@@ -662,8 +687,7 @@
         roleSelect.querySelectorAll("option").forEach((option) => {
           const optionSite = option.dataset.site || "";
           const optionSiteId = option.dataset.siteId || "";
-          const shouldShow =
-            isSiteMatch(optionSite, site, siteUrl) || isSiteIdMatch(optionSiteId, siteId);
+          const shouldShow = isSiteMatch(optionSite, site, siteUrl) || isSiteIdMatch(optionSiteId, siteId);
           option.hidden = !shouldShow;
           if (shouldShow && option.value) {
             hasVisible = true;
@@ -898,8 +922,7 @@
           const groupSelect = row.querySelector(".role-select");
           const roleSelect = row.querySelector(".role-input");
           const site = assignment.site || assignment.Site_LU?.Value || assignment.Site_LU || "";
-          const securityGroup =
-            assignment.securityGroup || assignment.Role_SG_LU?.Value || assignment.Role_SG_LU || "";
+          const securityGroup = assignment.securityGroup || assignment.Role_SG_LU?.Value || assignment.Role_SG_LU || "";
           const role = assignment.role || assignment.Role_LU?.Value || assignment.Role_LU || "";
           if (siteSelect && site) {
             siteSelect.value = site;
@@ -957,11 +980,23 @@
             populatePerson(data.person);
             populateAssignments(data.assignments || []);
             formStatus.textContent = "Loaded existing person + assignments.";
+            if (lookupStatus) {
+              lookupStatus.textContent = "Existing user found. Loaded profile + assignments.";
+              lookupStatus.className = "lookup-banner is-existing";
+            }
           } else {
             formStatus.textContent = "No existing person found. Continue with new entry.";
+            if (lookupStatus) {
+              lookupStatus.textContent = "New user. No existing profile found.";
+              lookupStatus.className = "lookup-banner is-new";
+            }
           }
         } catch (error) {
           formStatus.textContent = "Lookup failed. Continue with manual entry.";
+          if (lookupStatus) {
+            lookupStatus.textContent = "Lookup failed. Continue with manual entry.";
+            lookupStatus.className = "lookup-banner is-error";
+          }
         }
       }
 
@@ -990,6 +1025,13 @@
       document.getElementById("email").addEventListener("input", (event) => {
         const email = event.target.value.trim();
         clearTimeout(lookupTimer);
+        if (!email) {
+          lastLookupEmail = "";
+          if (lookupStatus) {
+            lookupStatus.textContent = "";
+            lookupStatus.className = "lookup-banner";
+          }
+        }
         lookupTimer = setTimeout(() => lookupByEmail(email), 600);
       });
 
