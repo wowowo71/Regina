@@ -1,0 +1,1009 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SharePoint Assignment Intake</title>
+    <style>
+      :root {
+        --bg: #f5f1e8;
+        --panel: #ffffff;
+        --ink: #1e1b16;
+        --muted: #6f6558;
+        --accent: #0f766e;
+        --accent-2: #c56b00;
+        --line: #e2d9cc;
+        --shadow: 0 16px 36px rgba(30, 27, 22, 0.12);
+        --radius: 14px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", "IBM Plex Sans", "Segoe UI", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(900px 600px at 12% -8%, rgba(15, 118, 110, 0.14), transparent 60%),
+          radial-gradient(700px 500px at 90% 8%, rgba(197, 107, 0, 0.14), transparent 60%),
+          linear-gradient(180deg, #f8f4ee, var(--bg));
+        min-height: 100vh;
+      }
+
+      .page {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: 44px 20px 80px;
+      }
+
+      .header {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 26px;
+      }
+
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(26px, 3vw, 40px);
+        line-height: 1.05;
+      }
+
+      .subtext {
+        max-width: 720px;
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 26px;
+      }
+
+      .section-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      .section-title h2 {
+        margin: 0;
+        font-size: 20px;
+      }
+
+      .pill {
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: #f1ede4;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .section-block {
+        margin-top: 20px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      label {
+        display: block;
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: #ffffff;
+        font-size: 15px;
+        color: var(--ink);
+      }
+
+      input[readonly] {
+        background: #f5f1e8;
+        color: #7a6f60;
+      }
+
+      input:focus,
+      select:focus {
+        outline: 2px solid rgba(15, 118, 110, 0.18);
+        border-color: var(--accent);
+      }
+
+      details {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px 14px;
+        background: #fffaf1;
+      }
+
+      details + details {
+        margin-top: 12px;
+      }
+
+      details summary {
+        cursor: pointer;
+        font-weight: 600;
+        list-style: none;
+      }
+
+      details summary::-webkit-details-marker {
+        display: none;
+      }
+
+      details summary::after {
+        content: "+";
+        float: right;
+        color: var(--muted);
+      }
+
+      details[open] summary::after {
+        content: "-";
+      }
+
+      .assignments {
+        display: grid;
+        gap: 14px;
+      }
+
+      .assignment-row {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: 1.1fr 1.7fr 1fr auto;
+        align-items: end;
+        padding: 14px;
+        border: 1px dashed var(--line);
+        border-radius: 12px;
+        background: rgba(15, 118, 110, 0.03);
+      }
+
+      .row-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: #ffffff;
+      }
+
+      .btn-ghost {
+        background: transparent;
+        border-color: var(--line);
+        color: var(--ink);
+      }
+
+      .btn-wide {
+        width: 100%;
+        justify-content: center;
+        border-color: rgba(15, 118, 110, 0.4);
+        color: var(--accent);
+        background: rgba(15, 118, 110, 0.08);
+      }
+
+      .btn-danger {
+        background: #fff4f2;
+        border-color: #f2c6c1;
+        color: #b42318;
+      }
+
+      .footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 20px;
+      }
+
+      .hint {
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .stats-grid {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        margin-top: 12px;
+      }
+
+      .stat-card {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px;
+        background: #ffffff;
+      }
+
+      .stat-title {
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .stat-value {
+        font-size: 20px;
+        font-weight: 600;
+        margin-top: 6px;
+      }
+
+      @media (max-width: 760px) {
+        .assignment-row {
+          grid-template-columns: 1fr;
+        }
+
+        .row-actions {
+          justify-content: flex-end;
+        }
+
+        .footer {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="header">
+        <div class="eyebrow">SharePoint Access Intake</div>
+        <h1>Add or edit a person, then assign roles across all lists.</h1>
+        <div class="subtext">
+          This form pulls from the SharePoint lists (People, Sites, Roles, RoleGroupMap, Assignments). It submits
+          a single payload to your Power Automate intake flow.
+        </div>
+      </div>
+
+      <form class="card" id="assignment-form" action="#" method="post">
+        <div class="section-title">
+          <h2>Person Details (People list)</h2>
+          <span class="pill">Auto-updated by flow</span>
+        </div>
+
+        <div class="section-block">
+          <div class="grid">
+            <div>
+              <label for="email">Email</label>
+              <input id="email" type="email" placeholder="name@company.com" required />
+            </div>
+            <div>
+              <label for="first">First name</label>
+              <input id="first" type="text" required />
+            </div>
+            <div>
+              <label for="last">Last name</label>
+              <input id="last" type="text" required />
+            </div>
+          </div>
+          <div class="hint">Existing email will auto-fill details and assignments if lookup is enabled.</div>
+        </div>
+
+        <div class="section-block">
+          <details>
+            <summary>Contact Details</summary>
+            <div class="section-block">
+              <div class="grid">
+                <div>
+                  <label for="middle">Middle name</label>
+                  <input id="middle" type="text" />
+                </div>
+                <div>
+                  <label for="job">Job title</label>
+                  <input id="job" type="text" />
+                </div>
+                <div>
+                  <label for="company">Organization</label>
+                  <input id="company" type="text" />
+                </div>
+                <div>
+                  <label for="office-phone">Office phone</label>
+                  <input id="office-phone" type="tel" />
+                </div>
+                <div>
+                  <label for="mobile-phone">Mobile phone</label>
+                  <input id="mobile-phone" type="tel" />
+                </div>
+                <div style="grid-column: span 2;">
+                  <label for="address">Mailing address</label>
+                  <input id="address" type="text" />
+                </div>
+                <div>
+                  <label for="city">City</label>
+                  <input id="city" type="text" />
+                </div>
+                <div>
+                  <label for="state">State</label>
+                  <input id="state" type="text" />
+                </div>
+                <div>
+                  <label for="zip">ZIP</label>
+                  <input id="zip" type="text" />
+                </div>
+                <div>
+                  <label for="country">Country</label>
+                  <input id="country" type="text" />
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="section-block">
+          <details>
+            <summary>Assistant Details</summary>
+            <div class="section-block">
+              <div class="grid">
+                <div>
+                  <label for="asst-first">Assistant first name</label>
+                  <input id="asst-first" type="text" />
+                </div>
+                <div>
+                  <label for="asst-last">Assistant last name</label>
+                  <input id="asst-last" type="text" />
+                </div>
+                <div>
+                  <label for="asst-email">Assistant email</label>
+                  <input id="asst-email" type="email" />
+                </div>
+                <div>
+                  <label for="asst-phone">Assistant phone</label>
+                  <input id="asst-phone" type="tel" />
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="section-block">
+          <details>
+            <summary>Status</summary>
+            <div class="section-block">
+              <div class="grid">
+                <div>
+                  <label for="onboarding">Onboarding status</label>
+                  <select id="onboarding">
+                    <option value=""></option>
+                    <option value="Send_Onboarding_Form">Send_Onboarding_Form</option>
+                    <option value="NPC_Awaiting_Form">NPC_Awaiting_Form</option>
+                    <option value="Onboarded">Onboarded</option>
+                    <option value="Send_Welcome_Email">Send_Welcome_Email</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Rapid_Stage_1">Rapid_Stage_1</option>
+                    <option value="Rapid_Stage_2">Rapid_Stage_2</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="section-block">
+          <details>
+            <summary>Data snapshot (all lists)</summary>
+            <div class="section-block">
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-title">People</div>
+                  <div class="stat-value" id="count-people">0</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-title">Sites</div>
+                  <div class="stat-value" id="count-sites">0</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-title">Roles</div>
+                  <div class="stat-value" id="count-roles">0</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-title">RoleGroupMap</div>
+                  <div class="stat-value" id="count-rolegroups">0</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-title">Assignments</div>
+                  <div class="stat-value" id="count-assignments">0</div>
+                </div>
+              </div>
+              <div class="section-block">
+                <button class="btn btn-ghost" type="button" id="refresh-data">Refresh lists</button>
+                <span class="hint" id="last-sync">Not loaded yet.</span>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="section-title" style="margin-top: 24px;">
+          <h2>Assignments (Assignments list)</h2>
+          <span class="pill">All Members auto-added by flow</span>
+        </div>
+
+        <div class="assignments" id="assignment-list">
+          <div class="assignment-row">
+            <div>
+              <label>Site</label>
+              <select class="site-select">
+                <option value="">Select a site</option>
+              </select>
+            </div>
+            <div>
+              <label>Security group</label>
+              <select class="role-select" required>
+                <option value="" data-site="">Select a security group</option>
+              </select>
+            </div>
+            <div>
+              <label>Role</label>
+              <select class="role-input" required>
+                <option value="">Select a role</option>
+              </select>
+            </div>
+            <div class="row-actions">
+              <button class="btn btn-danger" type="button">Remove</button>
+            </div>
+          </div>
+        </div>
+        <div class="section-block">
+          <button class="btn btn-wide" type="button" id="add-row">+ Add another role</button>
+        </div>
+
+        <div class="footer">
+          <div class="hint">Tip: Add as many roles as needed before submitting.</div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-ghost" type="reset">Clear</button>
+            <button class="btn btn-primary" type="submit">Submit assignments</button>
+          </div>
+        </div>
+        <div class="hint" id="form-status" style="margin-top: 10px;"></div>
+      </form>
+    </div>
+
+    <script>
+      
+const FLOW_URL = "https://46074bd623b7eb659325e9bd113c65.0f.environment.api.powerplatform.com:443/powerautomate/ automations/direct/workflows/10fd8c46f92d469c945b9da0c3ff12ec/triggers/ When_a_HTTP_request_is_received/paths/invoke?api- version=1&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=C2Re-lr- 6ACTJUfE9aZkKtzmHmP3zVEBStON4N_yNpE"; 
+
+const DATA_FLOW_URL = "https://46074bd623b7eb659325e9bd113c65.0f.environment.api.powerplatform.com:443/powerautomate/ automations/direct/workflows/f9caec2a4338481fb6f51209aa81b3ba/triggers/ When_a_HTTP_request_is_received/paths/invoke?api- version=1&sp=%2Ftriggers%2FWhen_a_HTTP_request_is_received%2Frun&sv=1.0&sig=3OZ5Ft7dAHNpZE9fJg1fYt 1eVH83PNMM0XBIM7dGncA";
+
+      const assignmentList = document.getElementById("assignment-list");
+      const addRowButton = document.getElementById("add-row");
+      const assignmentForm = document.getElementById("assignment-form");
+      const formStatus = document.getElementById("form-status");
+      const refreshDataButton = document.getElementById("refresh-data");
+      const lastSync = document.getElementById("last-sync");
+      const assignmentTemplate = assignmentList.querySelector(".assignment-row").cloneNode(true);
+      const dataStore = { sites: [], roles: [], roleGroups: [], people: [], assignments: [] };
+      let lookupTimer = null;
+      let lastLookupEmail = "";
+
+      function toArray(value) {
+        return Array.isArray(value) ? value : [];
+      }
+
+      function getField(item, keys) {
+        return keys.reduce((acc, key) => (acc ?? item?.[key]), undefined);
+      }
+
+      function normalizeSiteValue(value) {
+        if (!value) {
+          return "";
+        }
+        if (typeof value === "string") {
+          return value.trim();
+        }
+        const nested = getField(value, [
+          "Value",
+          "Title",
+          "title",
+          "Site_URL",
+          "SiteURL",
+          "siteUrl",
+          "site_url",
+        ]);
+        return typeof nested === "string" ? nested.trim() : "";
+      }
+
+      function isAllMembersGroup(group) {
+        const title = String(getField(group, ["title", "Title", "Sec_Group", "SecGroup", "Security_Group"]) || "");
+        const category = String(getField(group, ["groupCategory", "Group_Category", "Role"]) || "");
+        return title.toLowerCase().includes("all members") || category.toLowerCase() === "all members";
+      }
+
+      function refreshRoleAvailability() {
+        const rows = Array.from(assignmentList.querySelectorAll(".assignment-row"));
+        const selectedValues = rows
+          .map((row) => row.querySelector(".role-select")?.value)
+          .filter(Boolean);
+
+        rows.forEach((row) => {
+          const site = row.querySelector(".site-select")?.value;
+          const siteUrl = getSiteUrlByTitle(site);
+          const siteId = getSiteIdByTitle(site);
+          const roleSelect = row.querySelector(".role-select");
+          if (!roleSelect) {
+            return;
+          }
+
+          const current = roleSelect.value;
+          roleSelect.querySelectorAll("option").forEach((option) => {
+            const optionSite = option.dataset.site || "";
+            const optionSiteId = option.dataset.siteId || "";
+            const allowedBySite = isSiteMatch(optionSite, site, siteUrl);
+            const allowedById = isSiteIdMatch(optionSiteId, siteId);
+            const allowed = allowedBySite || allowedById;
+            if (!option.value || !allowed) {
+              option.hidden = !allowed;
+              option.disabled = !allowed;
+              return;
+            }
+
+            const isSelectedElsewhere = selectedValues.includes(option.value) && option.value !== current;
+            option.hidden = isSelectedElsewhere;
+            option.disabled = isSelectedElsewhere;
+          });
+        });
+      }
+
+      function filterRoles(row) {
+        const siteSelect = row.querySelector(".site-select");
+        const roleSelect = row.querySelector(".role-select");
+        if (!siteSelect || !roleSelect) {
+          return;
+        }
+
+        const site = siteSelect.value;
+        const siteUrl = getSiteUrlByTitle(site);
+        const siteId = getSiteIdByTitle(site);
+        let hasVisible = false;
+
+        roleSelect.querySelectorAll("option").forEach((option) => {
+          const optionSite = option.dataset.site || "";
+          const optionSiteId = option.dataset.siteId || "";
+          const shouldShow =
+            isSiteMatch(optionSite, site, siteUrl) || isSiteIdMatch(optionSiteId, siteId);
+          option.hidden = !shouldShow;
+          if (shouldShow && option.value) {
+            hasVisible = true;
+          }
+        });
+
+        if (!hasVisible || (roleSelect.selectedOptions[0] && roleSelect.selectedOptions[0].hidden)) {
+          roleSelect.value = "";
+        }
+
+        refreshRoleAvailability();
+      }
+
+      function bindRoleFiltering(row) {
+        const siteSelect = row.querySelector(".site-select");
+        const roleSelect = row.querySelector(".role-select");
+        if (!siteSelect) {
+          return;
+        }
+        siteSelect.addEventListener("change", () => filterRoles(row));
+        if (roleSelect) {
+          roleSelect.addEventListener("change", refreshRoleAvailability);
+        }
+        filterRoles(row);
+      }
+
+      function clearSelect(select, placeholderText) {
+        if (!select) {
+          return;
+        }
+        select.innerHTML = "";
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = placeholderText;
+        if (select.classList.contains("role-select")) {
+          placeholder.dataset.site = "";
+        }
+        select.appendChild(placeholder);
+      }
+
+      function isTruthy(value) {
+        if (typeof value === "boolean") {
+          return value;
+        }
+        const normalized = String(value || "").toLowerCase();
+        return normalized === "1" || normalized === "true" || normalized === "yes";
+      }
+
+      function populateSites(select) {
+        clearSelect(select, "Select a site");
+        dataStore.sites
+          .filter((site) => {
+            const active = getField(site, ["isActive", "Is_Active", "IsActive"]);
+            return active === undefined || isTruthy(active);
+          })
+          .forEach((site) => {
+            const option = document.createElement("option");
+            const title = getField(site, ["title", "Title", "Site", "name", "Name"]) || "";
+            option.value = title;
+            option.textContent = title;
+            select.appendChild(option);
+          });
+      }
+
+      function populateRoles(select) {
+        clearSelect(select, "Select a role");
+        dataStore.roles.forEach((role) => {
+          const option = document.createElement("option");
+          const title = getField(role, ["title", "Title", "name", "Name"]) || "";
+          option.value = title;
+          option.textContent = title;
+          select.appendChild(option);
+        });
+      }
+
+      function populateRoleGroups(select) {
+        clearSelect(select, "Select a security group");
+        dataStore.roleGroups.filter((group) => !isAllMembersGroup(group)).forEach((group) => {
+          const option = document.createElement("option");
+          const title = getField(group, ["title", "Title", "Sec_Group", "SecGroup", "Security_Group"]) || "";
+          const friendly = getField(group, ["friendly", "Sec_Group_Friendly", "SecGroupFriendly", "Friendly"]) || "";
+          const site = getField(group, ["site", "Site", "Site_LU", "SiteLU", "Site_Title"]) || "";
+          const siteUrl = getField(group, ["Site_URL", "SiteURL", "siteUrl", "site_url"]) || "";
+          const siteId = getField(group, ["Site_LU#Id", "Site_LU.Id", "SiteLUId", "SiteLU#Id", "SiteId"]) || "";
+          option.value = title;
+          option.textContent = friendly || title;
+          option.dataset.site = normalizeSiteValue(siteUrl || site);
+          option.dataset.siteId = String(siteId || "");
+          select.appendChild(option);
+        });
+      }
+
+      function hydrateRow(row) {
+        populateSites(row.querySelector(".site-select"));
+        populateRoleGroups(row.querySelector(".role-select"));
+        populateRoles(row.querySelector(".role-input"));
+        bindRemove(row.querySelector(".btn-danger"));
+        bindRoleFiltering(row);
+      }
+
+      function bindRemove(button) {
+        button.addEventListener("click", () => {
+          const rows = assignmentList.querySelectorAll(".assignment-row");
+          if (rows.length > 1) {
+            button.closest(".assignment-row").remove();
+            refreshRoleAvailability();
+          }
+        });
+      }
+
+      assignmentList.querySelectorAll(".assignment-row").forEach((row) => hydrateRow(row));
+
+      addRowButton.addEventListener("click", () => {
+        const clone = assignmentTemplate.cloneNode(true);
+        clone.querySelectorAll("input").forEach((input) => {
+          input.value = "";
+        });
+        clone.querySelectorAll("select").forEach((select) => {
+          select.selectedIndex = 0;
+        });
+        hydrateRow(clone);
+        assignmentList.appendChild(clone);
+      });
+
+      function setValue(id, value) {
+        const input = document.getElementById(id);
+        if (input && value !== undefined && value !== null) {
+          input.value = value;
+        }
+      }
+
+      function getSiteUrlByTitle(title) {
+        if (!title) {
+          return "";
+        }
+        const site = dataStore.sites.find((item) => {
+          const siteTitle = getField(item, ["title", "Title", "Site", "name", "Name"]) || "";
+          return siteTitle === title;
+        });
+        return getField(site || {}, ["Site_URL", "SiteURL", "siteUrl", "site_url"]) || "";
+      }
+
+      function getSiteIdByTitle(title) {
+        if (!title) {
+          return "";
+        }
+        const site = dataStore.sites.find((item) => {
+          const siteTitle = getField(item, ["title", "Title", "Site", "name", "Name"]) || "";
+          return siteTitle === title;
+        });
+        return site ? String(getField(site, ["ID", "Id", "id"]) || "") : "";
+      }
+
+      function isSiteMatch(optionSite, selectedTitle, selectedUrl) {
+        const normalizedOptionSite = normalizeSiteValue(optionSite);
+        const normalizedTitle = normalizeSiteValue(selectedTitle);
+        const normalizedUrl = normalizeSiteValue(selectedUrl);
+        if (!normalizedOptionSite) {
+          return true;
+        }
+        return (
+          normalizedOptionSite === normalizedTitle ||
+          normalizedOptionSite === normalizedUrl ||
+          normalizedOptionSite === normalizedTitle.replace(/\s+/g, " ") ||
+          normalizedOptionSite === normalizedUrl.replace(/\s+/g, " ")
+        );
+      }
+
+      function isSiteIdMatch(optionSiteId, selectedId) {
+        if (!optionSiteId) {
+          return false;
+        }
+        return String(optionSiteId) === String(selectedId);
+      }
+
+      function populatePerson(person = {}) {
+        const email = person.email || person.Title || "";
+        const first = person.firstName || person.First_Name || "";
+        const middle = person.middleName || person.Middle_Name || "";
+        const last = person.lastName || person.Last_Name || "";
+        const job = person.jobTitle || person.Job_Title || "";
+        const company = person.organization || person.Organization || "";
+        const officePhone = person.officePhoneNumber || person.Office_Phone_Number || "";
+        const mobilePhone = person.mobilePhoneNumber || person.Mobile_Phone_Number || "";
+        const address = person.mailingAddress || person.Mailing_Address || "";
+        const city = person.city || person.City || "";
+        const state = person.state || person.State || "";
+        const zip = person.zip || person.ZIP || "";
+        const country = person.country || person.Country || "";
+        const asstFirst = person.asstFirstName || person.Asst_First_Name || "";
+        const asstLast = person.asstLastName || person.Asst_Last_Name || "";
+        const asstEmail = person.asstEmail || person.Asst_Email || "";
+        const asstPhone = person.asstPhone || person.Asst_Phone || "";
+        const onboarding =
+          person.onboardingStatus ||
+          person.Onboarding_Status?.Value ||
+          person.Onboarding_Status ||
+          "";
+        setValue("email", email);
+        setValue("first", first);
+        setValue("middle", middle);
+        setValue("last", last);
+        setValue("job", job);
+        setValue("company", company);
+        setValue("office-phone", officePhone);
+        setValue("mobile-phone", mobilePhone);
+        setValue("address", address);
+        setValue("city", city);
+        setValue("state", state);
+        setValue("zip", zip);
+        setValue("country", country);
+        setValue("asst-first", asstFirst);
+        setValue("asst-last", asstLast);
+        setValue("asst-email", asstEmail);
+        setValue("asst-phone", asstPhone);
+        setValue("onboarding", onboarding);
+      }
+
+      function populateAssignments(assignments = []) {
+        assignmentList.innerHTML = "";
+        if (!assignments.length) {
+          const blankRow = assignmentTemplate.cloneNode(true);
+          hydrateRow(blankRow);
+          assignmentList.appendChild(blankRow);
+          return;
+        }
+
+        assignments.forEach((assignment) => {
+          const row = assignmentTemplate.cloneNode(true);
+          hydrateRow(row);
+          const siteSelect = row.querySelector(".site-select");
+          const groupSelect = row.querySelector(".role-select");
+          const roleSelect = row.querySelector(".role-input");
+          const site = assignment.site || assignment.Site_LU?.Value || assignment.Site_LU || "";
+          const securityGroup =
+            assignment.securityGroup || assignment.Role_SG_LU?.Value || assignment.Role_SG_LU || "";
+          const role = assignment.role || assignment.Role_LU?.Value || assignment.Role_LU || "";
+          if (siteSelect && site) {
+            siteSelect.value = site;
+          }
+          if (groupSelect && securityGroup) {
+            groupSelect.value = securityGroup;
+          }
+          if (roleSelect && role) {
+            roleSelect.value = role;
+          }
+          assignmentList.appendChild(row);
+        });
+        refreshRoleAvailability();
+      }
+
+      async function fetchData(payload) {
+        const response = await fetch(DATA_FLOW_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!response.ok) {
+          throw new Error(`Data request failed (${response.status})`);
+        }
+        return response.json();
+      }
+
+      async function loadOptions() {
+        if (!DATA_FLOW_URL || DATA_FLOW_URL.includes("PASTE_FLOW_URL_HERE")) {
+          formStatus.textContent = "Data flow URL missing. Dropdowns cannot load.";
+          return;
+        }
+        try {
+          const data = await fetchData({ mode: "init" });
+          dataStore.sites = toArray(data.sites || data.Sites);
+          dataStore.roles = toArray(data.roles || data.Roles);
+          dataStore.roleGroups = toArray(data.roleGroupMap || data.RoleGroupMap);
+          dataStore.people = toArray(data.people || data.People);
+          dataStore.assignments = toArray(data.assignments || data.Assignments);
+          assignmentList.querySelectorAll(".assignment-row").forEach((row) => hydrateRow(row));
+          renderDataSummary();
+        } catch (error) {
+          formStatus.textContent = "Unable to load dropdown data.";
+        }
+      }
+
+      async function lookupByEmail(email) {
+        if (!email || email === lastLookupEmail) {
+          return;
+        }
+        lastLookupEmail = email;
+        try {
+          const data = await fetchData({ mode: "lookup", email });
+          if (data.person) {
+            populatePerson(data.person);
+            populateAssignments(data.assignments || []);
+            formStatus.textContent = "Loaded existing person + assignments.";
+          } else {
+            formStatus.textContent = "No existing person found. Continue with new entry.";
+          }
+        } catch (error) {
+          formStatus.textContent = "Lookup failed. Continue with manual entry.";
+        }
+      }
+
+      function renderDataSummary() {
+        const countPeople = document.getElementById("count-people");
+        const countSites = document.getElementById("count-sites");
+        const countRoles = document.getElementById("count-roles");
+        const countRoleGroups = document.getElementById("count-rolegroups");
+        const countAssignments = document.getElementById("count-assignments");
+        if (countPeople) countPeople.textContent = dataStore.people.length;
+        if (countSites) countSites.textContent = dataStore.sites.length;
+        if (countRoles) countRoles.textContent = dataStore.roles.length;
+        if (countRoleGroups) countRoleGroups.textContent = dataStore.roleGroups.length;
+        if (countAssignments) countAssignments.textContent = dataStore.assignments.length;
+        if (lastSync) {
+          lastSync.textContent = `Last refreshed: ${new Date().toLocaleString()}`;
+        }
+      }
+
+      if (refreshDataButton) {
+        refreshDataButton.addEventListener("click", () => {
+          loadOptions();
+        });
+      }
+
+      document.getElementById("email").addEventListener("input", (event) => {
+        const email = event.target.value.trim();
+        clearTimeout(lookupTimer);
+        lookupTimer = setTimeout(() => lookupByEmail(email), 600);
+      });
+
+      loadOptions();
+
+      assignmentForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        formStatus.textContent = "";
+
+        const requestedBy = "HTML Form";
+        const payload = {
+          email: document.getElementById("email").value.trim(),
+          firstName: document.getElementById("first").value.trim(),
+          middleName: document.getElementById("middle").value.trim(),
+          lastName: document.getElementById("last").value.trim(),
+          jobTitle: document.getElementById("job").value.trim(),
+          organization: document.getElementById("company").value.trim(),
+          officePhoneNumber: document.getElementById("office-phone").value.trim(),
+          mobilePhoneNumber: document.getElementById("mobile-phone").value.trim(),
+          mailingAddress: document.getElementById("address").value.trim(),
+          city: document.getElementById("city").value.trim(),
+          state: document.getElementById("state").value.trim(),
+          zip: document.getElementById("zip").value.trim(),
+          country: document.getElementById("country").value.trim(),
+          asstFirstName: document.getElementById("asst-first").value.trim(),
+          asstLastName: document.getElementById("asst-last").value.trim(),
+          asstEmail: document.getElementById("asst-email").value.trim(),
+          asstPhone: document.getElementById("asst-phone").value.trim(),
+          onboardingStatus: document.getElementById("onboarding").value,
+          requestedBy,
+          assignments: [],
+        };
+
+        assignmentList.querySelectorAll(".assignment-row").forEach((row) => {
+          const site = row.querySelector(".site-select")?.value;
+          const securityGroup = row.querySelector(".role-select")?.value;
+          const role = row.querySelector(".role-input")?.value;
+          if (site && securityGroup && role) {
+            payload.assignments.push({
+              site,
+              securityGroup,
+              role,
+              status: "Active",
+              requestedBy,
+            });
+          }
+        });
+
+        if (!payload.email || !payload.firstName || !payload.lastName) {
+          formStatus.textContent = "Please enter email, first name, and last name.";
+          return;
+        }
+
+        if (payload.assignments.length === 0) {
+          formStatus.textContent = "Please add at least one assignment.";
+          return;
+        }
+
+        if (!FLOW_URL || FLOW_URL.includes("PASTE_FLOW_URL_HERE")) {
+          formStatus.textContent = "Flow URL missing. Submission blocked.";
+          return;
+        }
+
+        try {
+          const response = await fetch(FLOW_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Request failed (${response.status})`);
+          }
+
+          formStatus.textContent = "Submitted successfully.";
+          assignmentForm.reset();
+          refreshRoleAvailability();
+          assignmentList.querySelectorAll(".assignment-row").forEach(filterRoles);
+        } catch (error) {
+          formStatus.textContent = "Submission failed. Check the flow and try again.";
+        }
+      });
+    </script>
+  </body>
+</html>
